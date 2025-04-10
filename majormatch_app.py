@@ -40,7 +40,36 @@ desired_income = st.slider("Desired annual income ($)", 30000, 150000, 60000, st
 
 # Step 3: Manually defined course catalogs
 catalog_data = {
-    # ... (same catalog_data as before, omitted for brevity)
+    "Accounting": [
+        "BUAD 1111", "BUAD 2003", "ENGL 1013", "FAH 1XXX", "MATH 2223", "COMM 2173", "ENGL 1023",
+        "SCIL 1XXX", "ACCT 2004", "ACCT 2013", "BLAW 2033", "ECON 2003", "ECON 2013", "STAT 2163",
+        "ACCT 3003", "ACCT 3013", "ACCT 3023", "ACCT 3043", "ACCT 3053", "ACCT 4003", "ACCT 4013",
+        "ACCT 4023", "ACCT 4033", "MGMT 3003", "MGMT 3103", "MGMT 4083", "BDA 2003", "BDA 3003",
+        "BDA 3013", "MKT 3043", "FIN 3063", "ENGL 2053"
+    ],
+    "Business Management": [
+        "ENGL 1013", "FAH 1XXX", "PSY 2003", "MATH 1113", "BUAD 1111", "BUAD 2003",
+        "ENGL 1023", "SCIL 1XXX", "USHG 1XXX", "MATH 2223", "COMM 2173", "ACCT 2004",
+        "ECON 2003", "BDA 2003", "BLAW 2033", "ACCT 2013", "ECON 2013", "STAT 2163", "MGMT 3003",
+        "ENGL 2053", "MGMT 3123", "MKT 3043", "FIN 3063", "MGMT 3103", "MGMT 4013", "MGMT 4083"
+    ],
+    "Psychology": [
+        "ENGL 1013", "MATH XXXX", "TECH 1001", "USHG 1XXX", "ENGL 1023", "PSY 2003", "SCIL 1XXX",
+        "FAH 1XXX", "PSY 2053", "PSY 2063", "PSY 3191", "SOC 1003", "ANTH 1213", "PSY 3003",
+        "PSY 3053", "PSY 3063", "PSY 3073", "PSY 3123", "PSY 4003", "PSY 4103", "PSY 4203"
+    ],
+    "English Education": [
+        "ENGL 1013", "ENGL 1023", "ENGL 2003", "ENGL 2063", "ENGL 3023", "ENGL 3013", "ENGL 3313",
+        "ENGL 3323", "ENGL 3413", "ENGL 3423", "ENGL 4013", "ENGL 4733", "COMM 2003", "SEED 2003",
+        "SEED 2113", "SEED 4553", "SEED 4503", "SEED 4909", "SPED 4052", "EDMD 2013", "TECH 1001",
+        "MATH XXXX", "SCIL 1XXX", "SS 1XXX", "USHG 1XXX"
+    ],
+    "Political Science": [
+        "ENGL 1013", "ENGL 1023", "ECON 2003", "PSY 2003", "SOC 1003", "GEOG 2013", "HIST 1503",
+        "HIST 1513", "HIST 2003", "HIST 2013", "POLS 2003", "POLS 2253", "POLS 2403", "POLS 2413",
+        "POLS 2513", "POLS 3023", "POLS 3043", "POLS 3063", "POLS 4043", "POLS 4973", "POLS 4983",
+        "POLS 4963", "MATH XXXX", "TECH 1001", "SCIL 1XXX"
+    ]
 }
 
 income_estimates = {
