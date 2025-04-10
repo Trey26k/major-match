@@ -36,51 +36,103 @@ interests = {
     "tech": st.slider("I enjoy working with computers, tech, or data", 0, 10, 5),
 }
 
-# Step 3: Recommend Majors
+desired_income = st.slider("Desired annual income ($)", 30000, 150000, 60000, step=5000)
+
+# Step 3: Manually defined course catalogs
+catalog_data = {
+    # ... (same catalog_data as before, omitted for brevity)
+}
+
+income_estimates = {
+    "Accounting": 70000,
+    "Business Management": 65000,
+    "Psychology": 50000,
+    "English Education": 48000,
+    "Political Science": 55000
+}
+
+career_data = {
+    "Accounting": {
+        "jobs": ["Auditor", "Tax Analyst", "Corporate Accountant"],
+        "companies": ["Deloitte", "EY", "Walmart Finance"],
+    },
+    "Business Management": {
+        "jobs": ["Operations Manager", "Project Coordinator", "Business Analyst"],
+        "companies": ["J.B. Hunt", "Amazon", "Accenture"],
+    },
+    "Psychology": {
+        "jobs": ["Behavioral Health Technician", "Research Assistant", "HR Specialist"],
+        "companies": ["Arkansas Behavioral Health", "UAMS", "State Agencies"],
+    },
+    "English Education": {
+        "jobs": ["High School English Teacher", "Curriculum Designer", "ESL Instructor"],
+        "companies": ["Public Schools", "K12 Inc.", "Edmentum"],
+    },
+    "Political Science": {
+        "jobs": ["Policy Analyst", "Legislative Assistant", "Public Relations Associate"],
+        "companies": ["State Legislature", "NGOs", "Law Firms"],
+    }
+}
+
+def wildcard_match(course_pattern, completed):
+    if course_pattern.endswith("XXXX"):
+        prefix = course_pattern.split()[0]
+        return any(course.startswith(prefix) for course in completed)
+    elif course_pattern.endswith("1XXX"):
+        prefix = course_pattern.split()[0] + " 1"
+        return any(course.startswith(prefix) for course in completed)
+    else:
+        return course_pattern in completed
+
+# Matching logic
 st.header("🎯 Step 3: Your Recommended Majors")
 
-def score_major(interests, completed):
-    # Define sample majors and their requirements
-    majors = {
-        "Accounting": {
-            "required_courses": ["ACCT 2004", "ACCT 2013", "ECON 2003", "BLAW 2033"],
-            "interest_weights": {"numbers": 0.4, "business": 0.4, "tech": 0.2}
-        },
-        "Psychology": {
-            "required_courses": ["PSY 2003", "STAT 2163", "ENGL 1013"],
-            "interest_weights": {"people": 0.6, "creative": 0.2, "tech": 0.2}
-        },
-        "Computer Science": {
-            "required_courses": ["COMS 2003", "MATH 2914", "ENGL 1013"],
-            "interest_weights": {"tech": 0.6, "numbers": 0.3, "creative": 0.1}
-        },
-        "Marketing": {
-            "required_courses": ["MKT 3043", "BUAD 2003", "ENGL 2053"],
-            "interest_weights": {"business": 0.5, "creative": 0.3, "people": 0.2}
-        },
-        "English": {
-            "required_courses": ["ENGL 1013", "ENGL 1023", "ENGL 2053"],
-            "interest_weights": {"creative": 0.6, "people": 0.3, "tech": 0.1}
-        }
-    }
+def get_interest_score(major_name):
+    major_name = major_name.lower()
+    if "accounting" in major_name:
+        return (interests["numbers"] * 0.4 + interests["business"] * 0.4 + interests["tech"] * 0.2) / 10
+    elif "psychology" in major_name:
+        return (interests["people"] * 0.6 + interests["creative"] * 0.2 + interests["tech"] * 0.2) / 10
+    elif "business" in major_name:
+        return (interests["business"] * 0.5 + interests["numbers"] * 0.3 + interests["people"] * 0.2) / 10
+    elif "english" in major_name:
+        return (interests["creative"] * 0.6 + interests["people"] * 0.3 + interests["tech"] * 0.1) / 10
+    elif "political" in major_name:
+        return (interests["people"] * 0.5 + interests["creative"] * 0.3 + interests["numbers"] * 0.2) / 10
+    else:
+        return sum(interests.values()) / 50
 
+def score_majors(catalog, completed):
     results = []
-    for major, data in majors.items():
-        required = data["required_courses"]
-        matched = [course for course in required if course in completed]
-        completion_score = len(matched) / len(required)
+    for major, requirements in catalog.items():
+        matched = [req for req in requirements if wildcard_match(req, completed)]
+        completion_score = len(matched) / len(requirements) if requirements else 0
+        interest_score = get_interest_score(major)
+        income_gap = abs(income_estimates.get(major, 60000) - desired_income)
+        results.append((major, completion_score, interest_score, income_gap, matched, requirements))
 
-        interest_score = sum(interests[k] * v for k, v in data["interest_weights"].items()) / 10
-
-        total_score = round((completion_score * 0.6 + interest_score * 0.4) * 100, 1)
-        results.append((major, total_score, len(matched), len(required)))
-
-    return sorted(results, key=lambda x: x[1], reverse=True)
+    top_completion = sorted(results, key=lambda x: x[1], reverse=True)[:3]
+    return sorted(top_completion, key=lambda x: x[2], reverse=True)
 
 if transcript_df is not None:
-    ranked = score_major(interests, completed_courses)
-    for major, score, matched, total in ranked[:3]:
-        st.markdown(f"**{major}** — Fit Score: {score}%  ")
-        st.markdown(f"_Completed {matched} of {total} key courses_\n")
+    ranked = score_majors(catalog_data, completed_courses)
+    for major, comp_score, interest_score, income_gap, matched, requirements in ranked:
+        st.markdown(f"### 🎓 {major}")
+        st.markdown(f"**Progress:** {len(matched)} / {len(requirements)} courses completed ({round(100 * len(matched) / len(requirements))}%)")
+        st.markdown(f"**Interest Fit:** {round(interest_score * 100)}%")
+        st.markdown(f"**Estimated Salary:** ${income_estimates.get(major, 'N/A'):,}")
+
+        with st.expander("💼 Career Opportunities"):
+            st.markdown("**Example Job Titles:**")
+            st.write(", ".join(career_data.get(major, {}).get("jobs", [])))
+            st.markdown("**Employers Hiring This Major:**")
+            st.write(", ".join(career_data.get(major, {}).get("companies", [])))
+
+        with st.expander("📚 Courses Left to Complete"):
+            remaining = [r for r in requirements if not wildcard_match(r, completed_courses)]
+            for course in remaining:
+                st.markdown(f"- {course}")
+
+        st.markdown("---")
 else:
     st.info("Upload a transcript to see major recommendations.")
